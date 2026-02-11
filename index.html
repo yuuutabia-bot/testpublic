@@ -5,10 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yuuutabia Library</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
+:root {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #333;
+  --nav: #1f2937;
+  --accent: #6366f1;
+}
+
+body.dark {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --nav: #020617;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -17,59 +31,78 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: #f5f7fa;
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
+  transition: 0.3s;
 }
 
 /* Navbar */
 nav {
-  background: #1f2937;
+  background: var(--nav);
   color: white;
-  padding: 15px 30px;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 nav h1 {
-  font-size: 20px;
+  font-size: 18px;
+}
+
+.nav-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .search-box input {
-  padding: 8px 15px;
+  padding: 7px 12px;
   border-radius: 20px;
   border: none;
   outline: none;
-  width: 200px;
+  font-size: 13px;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
 }
 
 /* Hero */
 .hero {
   text-align: center;
-  padding: 40px 20px;
+  padding: 35px 15px;
 }
 
 .hero h2 {
-  font-size: 28px;
-  margin-bottom: 10px;
+  font-size: 22px;
+  margin-bottom: 8px;
 }
 
 .hero p {
-  color: #666;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-/* Library Grid */
+/* Library */
 .library {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 25px;
-  padding: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
 .book {
-  background: white;
+  background: var(--card);
   border-radius: 15px;
-  padding: 15px;
+  padding: 12px;
   text-align: center;
   transition: 0.3s ease;
   cursor: pointer;
@@ -77,42 +110,91 @@ nav h1 {
 }
 
 .book:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transform: translateY(-6px);
 }
 
 .cover {
   width: 100%;
-  height: 240px;
+  height: 210px;
   object-fit: cover;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .title {
   font-weight: 600;
-  font-size: 15px;
-}
-
-.author {
-  font-size: 13px;
-  color: gray;
-  margin-top: 4px;
-}
-
-/* Footer */
-footer {
-  background: #1f2937;
-  color: white;
-  text-align: center;
-  padding: 20px;
-  margin-top: 40px;
   font-size: 14px;
 }
 
-@media(max-width:600px){
-  .search-box input{
-    width:120px;
+.author {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Suggestion Box */
+.suggestion {
+  margin: 40px 20px;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.suggestion h3 {
+  margin-bottom: 15px;
+}
+
+.suggestion input,
+.suggestion textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-family: inherit;
+}
+
+.suggestion button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+footer {
+  background: var(--nav);
+  color: white;
+  text-align: center;
+  padding: 18px;
+  font-size: 13px;
+  margin-top: 30px;
+}
+
+/* Mobile */
+@media(max-width:500px){
+  nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .search-box input {
+    width: 100%;
+  }
+
+  .library {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cover {
+    height: 180px;
   }
 }
 </style>
@@ -122,17 +204,22 @@ footer {
 
 <nav>
   <h1>📚 Yuuutabia Library</h1>
-  <div class="search-box">
-    <input type="text" placeholder="Cari buku..." onkeyup="searchBook(this.value)">
+
+  <div class="nav-right">
+    <div class="search-box">
+      <input type="text" placeholder="Cari buku..." onkeyup="searchBook(this.value)">
+    </div>
+
+    <button class="toggle-btn" onclick="toggleDarkMode()">🌙</button>
   </div>
 </nav>
 
 <section class="hero">
-  <h2>Selamat Datang di Perpustakaan Online</h2>
-  <p>Baca buku favoritmu kapan saja & di mana saja</p>
+  <h2>Perpustakaan Online Modern</h2>
+  <p>Baca buku favoritmu dengan nyaman ✨</p>
 </section>
 
-<section class="library" id="library">
+<section class="library">
 
   <div class="book" data-title="madilog" onclick="openBook()">
     <img src="madilog.jpg" class="cover">
@@ -142,8 +229,17 @@ footer {
 
 </section>
 
+<!-- Kotak Saran -->
+<section class="suggestion">
+  <h3>📖 Saran Buku</h3>
+  <input type="text" id="bookName" placeholder="Judul Buku">
+  <input type="text" id="authorName" placeholder="Nama Penulis">
+  <textarea id="message" rows="3" placeholder="Pesan tambahan..."></textarea>
+  <button onclick="sendSuggestion()">Kirim Saran</button>
+</section>
+
 <footer>
-© 2026 Yuuutabia Library • Dibuat dengan ❤️
+© 2026 Yuuutabia Library • All Rights Reserved
 </footer>
 
 <script>
@@ -157,12 +253,49 @@ function searchBook(keyword){
 
   books.forEach(book => {
     const title = book.getAttribute("data-title");
-    if(title.includes(keyword)){
-      book.style.display = "block";
-    } else {
-      book.style.display = "none";
-    }
+    book.style.display = title.includes(keyword) ? "block" : "none";
   });
+}
+
+/* Auto Dark Mode Follow System */
+function applySystemTheme(){
+  if(localStorage.getItem("theme")){
+    if(localStorage.getItem("theme") === "dark"){
+      document.body.classList.add("dark");
+    }
+  } else {
+    if(window.matchMedia("(prefers-color-scheme: dark)").matches){
+      document.body.classList.add("dark");
+    }
+  }
+}
+
+/* Manual Toggle */
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+}
+
+applySystemTheme();
+
+/* Suggestion */
+function sendSuggestion(){
+  const book = document.getElementById("bookName").value;
+  const author = document.getElementById("authorName").value;
+  const msg = document.getElementById("message").value;
+
+  if(book === "" || author === ""){
+    alert("Isi judul dan penulis dulu ya 😊");
+    return;
+  }
+
+  alert("Terima kasih! Saran buku kamu sudah dikirim 📚✨");
+
+  document.getElementById("bookName").value = "";
+  document.getElementById("authorName").value = "";
+  document.getElementById("message").value = "";
 }
 </script>
 
