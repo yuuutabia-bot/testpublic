@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yuuutabia Reader</title>
+<title>Reader</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 
@@ -15,28 +15,35 @@ body {
   overflow-x: hidden;
 }
 
-/* HEADER */
-header {
+/* FLOATING MODE BUTTON */
+#modeToggle {
   position: fixed;
-  top: 0;
-  width: 100%;
+  bottom: 20px;
+  right: 20px;
   background: #111827;
   color: white;
+  padding: 12px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* PAGE CONTROLS */
+#pageControls {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111827;
   padding: 10px;
   text-align: center;
-  z-index: 1000;
-  transition: top 0.3s;
+  z-index: 998;
+  transition: transform 0.3s;
 }
 
-#progress-bar {
-  height: 3px;
-  background: #6366f1;
-  width: 0%;
-  transition: width 0.3s;
-}
-
-.controls {
-  margin-top: 6px;
+#pageControls.hidden {
+  transform: translateY(100%);
 }
 
 button {
@@ -48,13 +55,23 @@ button {
 }
 
 #page-slider {
-  width: 80%;
-  margin-top: 5px;
+  width: 70%;
+}
+
+/* PROGRESS BAR */
+#progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: #6366f1;
+  width: 0%;
+  z-index: 1000;
 }
 
 /* CONTAINER */
 #pdf-container {
-  margin-top: 150px;
+  margin-bottom: 80px;
   text-align: center;
 }
 
@@ -63,7 +80,7 @@ canvas {
   margin-bottom: 15px;
 }
 
-.slide-in {
+.slide {
   animation: slideIn 0.3s ease;
 }
 
@@ -71,39 +88,28 @@ canvas {
   from { transform: translateX(40px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
-
-/* SCROLL MODE CLEAN */
-.scroll-mode header {
-  display: none;
-}
-
-.scroll-mode #pdf-container {
-  margin-top: 20px;
-}
 </style>
 </head>
 
 <body>
 
-<header id="header">
-  📖 Reader
-  <div id="progress-bar"></div>
-
-  <div class="controls">
-    <button onclick="setMode('page')">Page Mode</button>
-    <button onclick="setMode('scroll')">Scroll Mode</button>
-    <br>
-    <div id="page-controls">
-      <button onclick="prevPage()">⬅</button>
-      <button onclick="nextPage()">➡</button>
-      <br>
-      <input type="range" id="page-slider" min="1" value="1">
-      <span id="page-num"></span>
-    </div>
-  </div>
-</header>
+<div id="progressBar"></div>
 
 <div id="pdf-container"></div>
+
+<!-- FLOATING BUTTON -->
+<div id="modeToggle" onclick="toggleMode()">
+  Switch Mode
+</div>
+
+<!-- PAGE CONTROLS -->
+<div id="pageControls">
+  <button onclick="prevPage()">⬅</button>
+  <button onclick="nextPage()">➡</button>
+  <br>
+  <input type="range" id="page-slider" min="1" value="1">
+  <span id="page-num"></span>
+</div>
 
 <script>
 
@@ -128,19 +134,20 @@ pdfjsLib.getDocument(book).promise.then(function(pdf){
 
 /* ================= MODE ================= */
 
-function setMode(selected){
-  localStorage.setItem("readerMode", selected);
-  location.reload();
+function toggleMode(){
+  mode = mode === "page" ? "scroll" : "page";
+  localStorage.setItem("readerMode", mode);
+  applyMode();
 }
 
 function applyMode(){
+  document.getElementById("pdf-container").innerHTML = "";
+
   if(mode === "scroll"){
-    document.body.classList.add("scroll-mode");
-    document.getElementById("page-controls").style.display = "none";
+    document.getElementById("pageControls").style.display = "none";
     renderScroll();
   } else {
-    document.body.classList.remove("scroll-mode");
-    document.getElementById("page-controls").style.display = "block";
+    document.getElementById("pageControls").style.display = "block";
     renderPage(currentPage);
   }
 }
@@ -151,13 +158,14 @@ function renderPage(num){
   document.getElementById("pdf-container").innerHTML = "";
 
   pdfDoc.getPage(num).then(function(page){
+
     let viewport = page.getViewport({scale: 1.3});
     let canvas = document.createElement("canvas");
     let ctx = canvas.getContext("2d");
 
     canvas.height = viewport.height;
     canvas.width = viewport.width;
-    canvas.classList.add("slide-in");
+    canvas.classList.add("slide");
 
     document.getElementById("pdf-container").appendChild(canvas);
 
@@ -196,10 +204,10 @@ document.getElementById("page-slider").addEventListener("input", function(){
 /* ================= SCROLL MODE ================= */
 
 function renderScroll(){
-  document.getElementById("pdf-container").innerHTML = "";
 
   for(let num = 1; num <= pdfDoc.numPages; num++){
     pdfDoc.getPage(num).then(function(page){
+
       let viewport = page.getViewport({scale: 1.2});
       let canvas = document.createElement("canvas");
       let ctx = canvas.getContext("2d");
@@ -215,6 +223,8 @@ function renderScroll(){
       });
     });
   }
+
+  document.getElementById("progressBar").style.width = "0%";
 }
 
 /* ================= SAVE ================= */
@@ -227,10 +237,10 @@ function savePage(){
 
 function updateProgress(){
   let percent = (currentPage / pdfDoc.numPages) * 100;
-  document.getElementById("progress-bar").style.width = percent + "%";
+  document.getElementById("progressBar").style.width = percent + "%";
 }
 
-/* ================= SWIPE (PAGE MODE ONLY) ================= */
+/* ================= SWIPE (PAGE MODE) ================= */
 
 let touchStartX = 0;
 
@@ -246,23 +256,6 @@ document.addEventListener("touchend", function(e){
 
   if(touchEndX < touchStartX - 50) nextPage();
   if(touchEndX > touchStartX + 50) prevPage();
-});
-
-/* ================= AUTO HIDE HEADER (PAGE MODE) ================= */
-
-let lastScroll = 0;
-window.addEventListener("scroll", function(){
-  if(mode !== "page") return;
-
-  let currentScroll = window.pageYOffset;
-
-  if(currentScroll > lastScroll){
-    document.getElementById("header").style.top = "-170px";
-  } else {
-    document.getElementById("header").style.top = "0";
-  }
-
-  lastScroll = currentScroll;
 });
 
 </script>
